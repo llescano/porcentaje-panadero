@@ -1,0 +1,86 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:recipe_app/services/baker_percentage_service.dart';
+import 'package:recipe_app/services/recipe_service.dart';
+import 'package:recipe_app/models/recipe_ingredient.dart';
+
+class RecipeDetailScreen extends StatefulWidget {
+  // ... (existing code)
+  @override
+  _RecipeDetailScreenState createState() => _RecipeDetailScreenState();
+}
+
+class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
+  // ... (existing code)
+
+  void _onIngredientQuantityChanged(
+    String recipeIngredientId,
+    String newQuantityText, {
+    bool fromFocusLoss = false,
+  }) async {
+    final bakerPercentageService = Provider.of<BakerPercentageService>(
+      context,
+      listen: false,
+    );
+
+    final double? newQuantity = double.tryParse(newQuantityText);
+    if (newQuantity == null || newQuantity < 0) {
+      return; // Si la cantidad no es válida, no hacer nada
+    }
+
+    setState(() {
+      // Encontrar el ingrediente original para obtener su cantidad original
+      final RecipeIngredient? originalIngredient = _originalRecipeIngredients.firstWhereOrNull(
+        (ri) => ri.id == recipeIngredientId,
+      );
+
+      if (originalIngredient == null || originalIngredient.quantity <= 0) {
+        // Si el ingrediente original no se encuentra o su cantidad es cero, no podemos escalar proporcionalmente.
+        // En este caso, actualizamos directamente el displayIngredient y recalculamos el total de masa para evitar que todo se ponga a cero.
+        final int displayIndex = _displayRecipeIngredients.indexWhere(
+          (ri) => ri.id == recipeIngredientId,
+        );
+        if (displayIndex != -1) {
+          _displayRecipeIngredients[displayIndex] = _displayRecipeIngredients[displayIndex].copyWith(quantity: newQuantity);
+        }
+        _calculateTotalDoughWeight(); // Recalcular solo el total de masa con la nueva cantidad
+      } else {
+        // Calcular el factor de escala basado en la nueva cantidad y la cantidad original del ingrediente
+        final double scaleFactor = newQuantity / originalIngredient.quantity;
+
+        // Aplicar este factor de escala al peso total de la masa actual
+        _totalDoughWeight = _totalDoughWeight * scaleFactor;
+
+        // Recalcular _displayRecipeIngredients a partir de _originalRecipeIngredients con el nuevo peso total de la masa
+        _displayRecipeIngredients = bakerPercentageService
+            .recalculateRecipeBasedOnTotalDoughWeight(
+              _originalRecipeIngredients,
+              _totalDoughWeight,
+            );
+      }
+
+      _calculateTotalHydration();
+      // Asegurarse de que el controlador de peso total de la masa se actualice si no tiene el foco
+      if (!_totalDoughWeightFocusNode.hasFocus) {
+        _totalDoughWeightController.text = _formatNumber(_totalDoughWeight);
+      }
+
+      // Actualizar todos los controladores de cantidad con los nuevos valores escalados
+      for (var ri in _displayRecipeIngredients) {
+        _quantityControllers[ri.id!]?.text = _formatNumber(ri.quantity);
+      }
+    });
+
+    // Guardar el nuevo lastTotalDoughWeight en la receta y en la base de datos
+    if (_recipe != null && _totalDoughWeight > 0) {
+      _recipe = _recipe!.copyWith(lastTotalDoughWeight: _totalDoughWeight);
+      final recipeService = Provider.of<RecipeService>(context, listen: false);
+      await recipeService.updateRecipe(
+        _recipe!,
+        _originalRecipeIngredients, // Siempre pasar ingredientes originales para guardar
+      );
+    }
+  }
+
+  // ... (rest of the existing code)
+} 
