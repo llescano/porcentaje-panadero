@@ -21,12 +21,14 @@ class _IngredientFormScreenState extends State<IngredientFormScreen> {
   final _costController = TextEditingController();
   final _supplierController = TextEditingController();
   final _conversionFactorToGramsController = TextEditingController();
+  final _notesController = TextEditingController();
 
   MeasurementUnit _selectedUnit = MeasurementUnit.grams;
   IngredientCategory _selectedCategory = IngredientCategory.other;
   DateTime? _expirationDate;
   bool _contributesToHydration = false;
   bool _isActive = true;
+  bool _isOptional = false;
   double? _conversionFactorToGrams;
   bool _isLoading = false;
 
@@ -71,6 +73,8 @@ class _IngredientFormScreenState extends State<IngredientFormScreen> {
     _expirationDate = ingredient.expirationDate;
     _contributesToHydration = ingredient.contributesToHydration;
     _isActive = ingredient.isActive;
+    _isOptional = ingredient.isOptional ?? false;
+    _notesController.text = ingredient.notes ?? '';
     _conversionFactorToGrams = ingredient.conversionFactorToGrams;
     _conversionFactorToGramsController.text =
         ingredient.conversionFactorToGrams != null
@@ -88,6 +92,7 @@ class _IngredientFormScreenState extends State<IngredientFormScreen> {
     _costController.dispose();
     _supplierController.dispose();
     _conversionFactorToGramsController.dispose();
+    _notesController.dispose();
     super.dispose();
   }
 
@@ -137,6 +142,11 @@ class _IngredientFormScreenState extends State<IngredientFormScreen> {
         contributesToHydration: _contributesToHydration,
         conversionFactorToGrams: finalConversionFactor,
         isActive: _isActive,
+        isOptional: _isOptional,
+        notes:
+            _notesController.text.trim().isEmpty
+                ? null
+                : _notesController.text.trim(),
         createdAt: widget.ingredient?.createdAt,
         updatedAt: DateTime.now(),
       );
@@ -192,7 +202,6 @@ class _IngredientFormScreenState extends State<IngredientFormScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CustomAppBar(
-        // Usar CustomAppBar
         title:
             widget.ingredient == null
                 ? 'Nuevo Ingrediente'
@@ -206,23 +215,51 @@ class _IngredientFormScreenState extends State<IngredientFormScreen> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            // Estado activo (movido al inicio)
-            SwitchListTile(
-              title: const Text('Ingrediente activo'),
-              subtitle: Text(
-                _isActive
-                    ? 'Disponible para usar en recetas'
-                    : 'No disponible para usar',
-              ),
-              value: _isActive,
-              onChanged: (value) {
-                setState(() {
-                  _isActive = value;
-                });
-              },
-              shape: RoundedRectangleBorder(
+            // Estado activo (movido al inicio) - Switch más pequeño
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey.shade400),
                 borderRadius: BorderRadius.circular(8),
-                side: BorderSide(color: Colors.grey.shade400),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Row(
+                  children: [
+                    const Icon(Icons.power_settings_new, color: Colors.grey),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Ingrediente activo',
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                          ),
+                          Text(
+                            _isActive
+                                ? 'Disponible para usar en recetas'
+                                : 'No disponible para usar',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Transform.scale(
+                      scale: 0.8, // Hacer el switch más pequeño
+                      child: Switch(
+                        value: _isActive,
+                        onChanged: (value) {
+                          setState(() {
+                            _isActive = value;
+                          });
+                        },
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
 
@@ -254,15 +291,18 @@ class _IngredientFormScreenState extends State<IngredientFormScreen> {
 
                     const SizedBox(height: 16),
 
-                    // Descripción
+                    // Descripción - Campo expandible
                     TextFormField(
                       controller: _descriptionController,
                       decoration: const InputDecoration(
                         labelText: 'Descripción',
                         border: OutlineInputBorder(),
                         prefixIcon: Icon(Icons.description),
+                        alignLabelWithHint: true,
                       ),
-                      maxLines: 3,
+                      minLines: 1,
+                      maxLines: null, // Permite expansión ilimitada
+                      keyboardType: TextInputType.multiline,
                     ),
 
                     const SizedBox(height: 16),
@@ -456,23 +496,96 @@ class _IngredientFormScreenState extends State<IngredientFormScreen> {
 
                     const SizedBox(height: 16),
 
-                    // Contribuye a la hidratación
-                    SwitchListTile(
-                      title: const Text('Contribuye a la hidratación'),
-                      subtitle: const Text('Cuenta como líquido'),
-                      value: _contributesToHydration,
-                      onChanged:
-                          _isActive
-                              ? (value) {
-                                setState(() {
-                                  _contributesToHydration = value;
-                                });
-                              }
-                              : null,
-                      shape: RoundedRectangleBorder(
+                    // Contribuye a la hidratación - Switch más pequeño
+                    Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey.shade400),
                         borderRadius: BorderRadius.circular(8),
-                        side: BorderSide(color: Colors.grey.shade400),
                       ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.water_drop, color: Colors.grey),
+                            const SizedBox(width: 12),
+                            const Expanded(
+                              child: Text(
+                                'Cuenta como líquido',
+                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                              ),
+                            ),
+                            Transform.scale(
+                              scale: 0.8, // Hacer el switch más pequeño
+                              child: Switch(
+                                value: _contributesToHydration,
+                                onChanged:
+                                    _isActive
+                                        ? (value) {
+                                          setState(() {
+                                            _contributesToHydration = value;
+                                          });
+                                        }
+                                        : null,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // Es opcional - Switch más pequeño
+                    Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey.shade400),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.help_outline, color: Colors.grey),
+                            const SizedBox(width: 12),
+                            const Expanded(
+                              child: Text(
+                                'Es opcional?',
+                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                              ),
+                            ),
+                            Transform.scale(
+                              scale: 0.8, // Hacer el switch más pequeño
+                              child: Switch(
+                                value: _isOptional,
+                                onChanged:
+                                    _isActive
+                                        ? (value) {
+                                          setState(() {
+                                            _isOptional = value;
+                                          });
+                                        }
+                                        : null,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // Notas - Campo expandible al final
+                    TextFormField(
+                      controller: _notesController,
+                      decoration: const InputDecoration(
+                        labelText: 'Notas (opcional)',
+                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(Icons.note),
+                        alignLabelWithHint: true,
+                      ),
+                      minLines: 1,
+                      maxLines: null, // Permite expansión ilimitada
+                      keyboardType: TextInputType.multiline,
                     ),
                   ],
                 ),
@@ -480,26 +593,6 @@ class _IngredientFormScreenState extends State<IngredientFormScreen> {
             ),
 
             const SizedBox(height: 32),
-
-            // Botón guardar
-            ElevatedButton(
-              onPressed: _isLoading ? null : _saveIngredient,
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-              ),
-              child:
-                  _isLoading
-                      ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                      : Text(
-                        widget.ingredient == null
-                            ? 'Crear Ingrediente'
-                            : 'Actualizar Ingrediente',
-                      ),
-            ),
           ],
         ),
       ),

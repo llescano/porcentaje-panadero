@@ -25,7 +25,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 10, // Incrementar la versión de la base de datos
+      version: 11, // Incrementar la versión de la base de datos
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -47,6 +47,8 @@ class DatabaseHelper {
         is_active INTEGER NOT NULL DEFAULT 1,
         contributes_to_hydration BOOLEAN NOT NULL DEFAULT 0,
         conversion_factor_to_grams REAL, -- Añadir la nueva columna
+        is_optional INTEGER NOT NULL DEFAULT 0,
+        notes TEXT,
         created_at TEXT NOT NULL,
         updated_at TEXT NOT NULL
       )
@@ -165,6 +167,15 @@ class DatabaseHelper {
       // Migración de v9 a v10: añadir last_total_dough_weight a recipes
       await db.execute(
         'ALTER TABLE recipes ADD COLUMN last_total_dough_weight REAL;',
+      );
+    }
+    if (oldVersion < 11 && newVersion >= 11) {
+      // Migración de v10 a v11: añadir is_optional y notes a ingredients
+      await db.execute(
+        'ALTER TABLE ingredients ADD COLUMN is_optional INTEGER NOT NULL DEFAULT 0;',
+      );
+      await db.execute(
+        'ALTER TABLE ingredients ADD COLUMN notes TEXT;',
       );
     }
   }

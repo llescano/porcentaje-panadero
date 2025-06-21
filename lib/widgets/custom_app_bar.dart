@@ -8,7 +8,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final bool isLoading;
   final VoidCallback? onSave;
   final List<Widget>? actions;
-  final bool showBackButton; // Nuevo parámetro
+  final bool showBackButton;
 
   const CustomAppBar({
     super.key,
@@ -17,7 +17,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.isLoading = false,
     this.onSave,
     this.actions,
-    this.showBackButton = false, // Valor por defecto
+    this.showBackButton = false,
   });
 
   @override
@@ -37,7 +37,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               )
               : null,
       actions: [
-        if (isForm) ..._buildFormActions(),
+        if (isForm) ..._buildFormActions(context),
         ...?actions,
         IconButton(
           icon: Icon(isDark ? Icons.light_mode : Icons.dark_mode),
@@ -47,7 +47,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     );
   }
 
-  List<Widget> _buildFormActions() {
+  List<Widget> _buildFormActions(BuildContext context) {
     return [
       if (isLoading)
         const Padding(
@@ -64,7 +64,11 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           ),
         )
       else if (onSave != null)
-        IconButton(icon: const Icon(Icons.save), onPressed: onSave),
+        IconButton(
+          icon: const Icon(Icons.save),
+          onPressed: onSave,
+          tooltip: 'Guardar',
+        ),
     ];
   }
 

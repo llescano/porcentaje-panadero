@@ -280,3 +280,43 @@ void onSearchChanged(String query) {
     _performSearch(query);
   });
 }
+
+```
+
+## Diagrama de Arquitectura
+
+```mermaid
+graph TD
+    subgraph "UI Layer (Vistas)"
+        A[Screens/Widgets <br/> e.g., RecipeDetailScreen]
+    end
+
+    subgraph "State Management (Provider)"
+        B[Services <br/> e.g., RecipeService, IngredientService]
+    end
+
+    subgraph "Business Logic"
+        C[Core Logic <br/> e.g., BakerPercentageService]
+    end
+
+    subgraph "Data Layer"
+        D[Database Helper <br/> e.g., DatabaseHelper]
+        E[SQLite Database]
+    end
+
+    subgraph "Models"
+        F[Data Models <br/> e.g., Recipe, Ingredient]
+    end
+
+    A -->|"Interactúa con"| B
+    B -->|"Utiliza"| C
+    B -->|"Accede a datos vía"| D
+    D -->|"Ejecuta queries en"| E
+    B -->|"Retorna/Recibe"| F
+    C -->|"Manipula"| F
+    A -->|"Muestra"| F
+```
+
+## Patrones de Diseño Clave
+- **Singleton/Service Locator**: Usando `Provider` para asegurar una única instancia de los servicios (`RecipeService`, `IngredientService`) disponible en el árbol de widgets.
+- **Repository Pattern (Abstracto)**: `DatabaseHelper` actúa como una capa de repositorio, abstrayendo el acceso a la fuente de datos (SQLite).

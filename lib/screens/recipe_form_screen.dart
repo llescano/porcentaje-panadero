@@ -285,6 +285,17 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
           const SnackBar(content: Text('Receta creada exitosamente!')),
         );
         _hasChanges = false; // Restablecer después de guardar
+        
+        // Navegar a la pantalla de detalle de la nueva receta
+        Navigator.of(context).pushReplacementNamed(
+          '/recipe/detail',
+          arguments: Recipe(
+            id: newRecipeToSave.id,
+            name: newRecipeToSave.name,
+            description: newRecipeToSave.description,
+          ),
+        );
+        return; // Salir temprano para evitar el pop() al final
       } else {
         // Calcular porcentajes de panadero antes de actualizar
         final updatedIngredientsForSave = _bakerPercentageService
@@ -328,11 +339,21 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
   String _formatBakerPercentageForDisplay(double percentage) {
     if (percentage == 0.0) {
       return '0%'; // Mostrar 0% si es 0
-    } else if (percentage < 1.0 && percentage > 0.0) {
-      return '${NumberFormat('0.##', 'es_ES').format(percentage)}%';
-    } else {
-      return '${NumberFormat('###0', 'es_ES').format(percentage)}%';
     }
+    
+    // Algoritmo de rangos de magnitud para determinar decimales dinámicamente
+    int decimals;
+    if (percentage >= 100) {
+      decimals = 0; // Valores grandes: sin decimales (ej: 150%)
+    } else if (percentage >= 10) {
+      decimals = 1; // Valores medianos: 1 decimal (ej: 15.5%)
+    } else if (percentage >= 1) {
+      decimals = 2; // Valores pequeños: 2 decimales (ej: 2.75%)
+    } else {
+      decimals = 3; // Valores muy pequeños: 3 decimales (ej: 0.125%)
+    }
+    
+    return '${percentage.toStringAsFixed(decimals)}%';
   }
 
   @override
@@ -609,11 +630,21 @@ class _IngredientFormDialogContentState
   String _formatBakerPercentageForDisplay(double percentage) {
     if (percentage == 0.0) {
       return ''; // No mostrar nada si es 0
-    } else if (percentage < 1.0 && percentage > 0.0) {
-      return NumberFormat('0.##', 'es_ES').format(percentage);
-    } else {
-      return NumberFormat('###0', 'es_ES').format(percentage);
     }
+    
+    // Algoritmo de rangos de magnitud para determinar decimales dinámicamente
+    int decimals;
+    if (percentage >= 100) {
+      decimals = 0; // Valores grandes: sin decimales (ej: 150)
+    } else if (percentage >= 10) {
+      decimals = 1; // Valores medianos: 1 decimal (ej: 15.5)
+    } else if (percentage >= 1) {
+      decimals = 2; // Valores pequeños: 2 decimales (ej: 2.75)
+    } else {
+      decimals = 3; // Valores muy pequeños: 3 decimales (ej: 0.125)
+    }
+    
+    return percentage.toStringAsFixed(decimals);
   }
 
   @override
@@ -780,7 +811,11 @@ class _IngredientFormDialogContentState
           mainAxisSize: MainAxisSize.min,
           children: [
             DropdownButtonFormField<String>(
-              decoration: const InputDecoration(labelText: 'Ingrediente'),
+              decoration: const InputDecoration(
+                labelText: 'Ingrediente',
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.grain),
+              ),
               value: selectedIngredientId,
               items:
                   widget.availableIngredients.map((ingredient) {
@@ -810,6 +845,11 @@ class _IngredientFormDialogContentState
                       contributesToHydration:
                           _currentSelectedIngredient!.contributesToHydration,
                     );
+                    
+                    // Mover el foco al campo de cantidad después de seleccionar el ingrediente
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      _quantityFocusNode.requestFocus();
+                    });
                   } else {
                     _selectedInputUnit = MeasurementUnit.grams; // Fallback
                     _quantityController.text = _formatQuantityForDisplay(
@@ -837,11 +877,15 @@ class _IngredientFormDialogContentState
                 });
               },
             ),
+            const SizedBox(height: 16),
             // Nuevo Dropdown para la unidad de visualización
-            if (_currentSelectedIngredient != null)
+            if (_currentSelectedIngredient != null) ...[
+              const SizedBox(height: 16),
               DropdownButtonFormField<MeasurementUnit>(
                 decoration: const InputDecoration(
                   labelText: 'Unidad de Visualización',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.straighten),
                 ),
                 value: _selectedInputUnit,
                 items:
@@ -862,8 +906,7 @@ class _IngredientFormDialogContentState
                       // Convertir la cantidad actual a la nueva unidad de visualización
                       final double currentQuantity =
                           double.tryParse(_quantityController.text) ?? 0.0;
-                      final double
-                      quantityInGrams = widget.convertQuantityToGrams(
+                      final double quantityInGrams = widget.convertQuantityToGrams(
                         currentQuantity,
                         _currentSelectedIngredient!,
                         _selectedInputUnit, // Usar la unidad anterior para la conversión a gramos
@@ -892,11 +935,17 @@ class _IngredientFormDialogContentState
                   }
                 },
               ),
+            ],
+            const SizedBox(height: 16),
             TextFormField(
               controller: _quantityController,
               focusNode:
                   _quantityFocusNode, // Asignar FocusNode al TextFormField
-              decoration: const InputDecoration(labelText: 'Cantidad'),
+              decoration: const InputDecoration(
+                labelText: 'Cantidad',
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.scale),
+              ),
               keyboardType: const TextInputType.numberWithOptions(
                 decimal: true,
               ),
@@ -938,18 +987,20 @@ class _IngredientFormDialogContentState
                 return null;
               },
             ),
+            const SizedBox(height: 16),
             TextFormField(
               controller: _percentageController,
               decoration: const InputDecoration(
                 labelText: 'Porcentaje Panadero',
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.percent),
               ),
               readOnly: true,
             ),
+            const SizedBox(height: 16),
             SwitchListTile(
               title: const Text('Contribuye a la hidratación'),
-              subtitle: const Text(
-                'Indica si este ingrediente se considera líquido en los cálculos de porcentaje de panadero.',
-              ),
+              subtitle: const Text('Cuenta como líquido'),
               value: _tempRecipeIngredient.contributesToHydration,
               onChanged: (bool value) {
                 setState(() {
@@ -981,14 +1032,19 @@ class _IngredientFormDialogContentState
             ),
             TextFormField(
               initialValue: _tempRecipeIngredient.notes,
-              decoration: const InputDecoration(labelText: 'Notas (opcional)'),
-              maxLines: 2,
+              decoration: const InputDecoration(
+                labelText: 'Notas (opcional)',
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.note),
+              ),
+              maxLines: 3,
               onChanged: (value) {
                 _tempRecipeIngredient = _tempRecipeIngredient.copyWith(
                   notes: value,
                 );
               },
             ),
+            const SizedBox(height: 16),
             SwitchListTile(
               title: const Text('Es opcional'),
               subtitle: const Text(
@@ -1002,8 +1058,12 @@ class _IngredientFormDialogContentState
                   );
                 });
               },
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+                side: BorderSide(color: Colors.grey.shade400),
+              ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 32),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [

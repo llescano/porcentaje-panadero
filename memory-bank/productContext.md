@@ -61,3 +61,31 @@ Los panaderos enfrentan dificultades constantes para:
 - Funciones premium (análisis nutricional, costeo avanzado)
 - Integración con proveedores de ingredientes
 - Monetización a través de publicidad contextual
+
+- **Búsqueda Avanzada**: Filtrar recetas por ingredientes, categorías o complejidad para encontrar rápidamente lo que el usuario necesita.
+
+## Estrategia de Monetización Propuesta
+- **Freemium**: La aplicación será gratuita para descargar y usar con todas las funcionalidades core.
+- **Publicidad**: Inclusión de banners publicitarios no intrusivos en las pantallas de listas.
+- **Versión Premium (Futura)**:
+  - Sin publicidad.
+  - Funcionalidades avanzadas como análisis de costos, planificación de producción y backup en la nube.
+  - Sincronización entre dispositivos.
+
+## Riesgos y Mitigaciones
+
+### Técnicos
+- **Complejidad de Cálculos**: Mitigado mediante el uso de `BakerPercentageService`, una clase dedicada y testeable para toda la lógica de negocio.
+- **Performance con Muchas Recetas**: A futuro, se implementará paginación y carga diferida (lazy loading) en las listas.
+- **Sincronización Futura**: La arquitectura con `Repository Pattern` y servicios desacoplados facilita la futura migración a un backend como Appwrite.
+
+### UX/UI
+- **Curva de Aprendizaje**: El diseño se enfoca en la simplicidad. A futuro, se podrían añadir tutoriales integrados para explicar el concepto de porcentaje panadero.
+- **Precisión vs Simplicidad**: Se busca un balance, ofreciendo cálculos precisos sin sobrecargar al usuario con opciones.
+- **Validación en Tiempo Real**: Los formularios y la pantalla de detalle ofrecen feedback inmediato al usuario mientras modifica las cantidades.
+
+## Futuro del Producto
+- **Comunidad**: Foros o sección para compartir recetas.
+- **Integración**: Conectar con tiendas de ingredientes.
+- **Analytics**: Análisis nutricional de recetas.
+- **Multiplataforma**: Expansión a web y desktop.

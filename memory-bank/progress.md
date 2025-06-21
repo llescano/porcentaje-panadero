@@ -1,8 +1,8 @@
 # Progreso del Proyecto - Porcentaje Panadero
 
 ## Estado General
-**Última Actualización**: 26/5/2025, 1:40 PM
-**Fase Actual**: Testing y Verificación de Funcionalidades Core Completada ✅
+**Última Actualización**: 29/07/2024, 11:30 AM
+**Fase Actual**: Desarrollo de Funcionalidades Avanzadas
 
 ## ✅ Completado
 
@@ -86,21 +86,17 @@
 ### Funcionalidades de Recetas ✅
 - [x] **RecipeListScreen** - Lista de recetas con búsqueda
 - [x] **RecipeFormScreen** - Editor de recetas completo (incluyendo persistencia de ingredientes)
-- [x] **RecipeDetailScreen** - Vista detallada con ingredientes y cálculos básicos
+- [x] **RecipeDetailScreen Avanzada** - Vista detallada con escalado dinámico de recetas. Permite recalcular todas las cantidades de ingredientes basándose en el peso total de la masa o en la cantidad de cualquier ingrediente individual, manteniendo las proporciones. También muestra la hidratación total.
 - [x] **Edición de Receta desde Detalle** - Navegación correcta a la pantalla de edición
 - [x] **Visualización de Ingredientes Inactivos** - La pantalla de detalle de ingrediente muestra el estado 'INACTIVO' y aplica opacidad si el ingrediente no está activo.
-- [ ] **Calculadora standalone** - Herramienta independiente (Pendiente)
 
 ## 🔄 En Progreso
 *Desarrollo core completado - listo para funcionalidades avanzadas*
 
 ## 📋 Pendiente (Próximos Pasos)
 
-### Fase Actual: Funcionalidades de Recetas
-- [ ] **Calculadora standalone** - Herramienta independiente
-
 ### Funcionalidades Avanzadas
-- [ ] **Alacena/Inventario** - Gestión de stock de ingredientes
+- [ ] **Alacena** - Gestión de inventario de ingredientes
 - [ ] **Escalado automático** - Calculadora de porciones
 - [ ] **Búsqueda avanzada** - Filtros por tipo, categoría, etc.
 - [ ] **Exportar recetas** - PDF o compartir
@@ -110,10 +106,6 @@
 - [ ] **Tests de integración** - Cobertura completa
 - [ ] **Validaciones avanzadas** - Edge cases
 - [ ] **Rendimiento** - Optimizaciones de base de datos
-
-### Preparación para Release
-- [ ] **Localización** - Soporte multi-idioma
-- [ ] **Dark mode** - Tema oscuro (Ajustes finales)
 - [ ] **Onboarding** - Tutorial inicial
 - [ ] **Iconos y branding** - Identidad visual
 
@@ -179,6 +171,7 @@
 - **Persistencia de Estado**: Cache para mejorar rendimiento
 - **Validaciones**: Implementar validaciones más robustas
 - **Testing**: Ampliar cobertura de tests
+- **Performance**: Optimizar queries de base de datos
 
 ## 📝 Notas de Progreso
 
@@ -208,16 +201,15 @@
 ## 🚀 Siguiente Sprint (Prioridades)
 
 ### Alta Prioridad
-1. **Calculadora standalone** - Herramienta independiente
+1. **Alacena básica** - Gestión de inventario
+2. **Mejoras de validación** - Robustez
 
 ### Media Prioridad
-2. **Alacena básica** - Gestión de inventario
-3. **Mejoras de validación** - Robustez
-4. **Tests adicionales** - Cobertura
+3. **Tests adicionales** - Cobertura
+4. **UI improvements** - Pulido visual
 
 ### Baja Prioridad
-5. **UI improvements** - Pulido visual
-6. **Búsqueda avanzada** - Filtros por tipo, categoría, etc.
+5. **Búsqueda avanzada** - Filtros por tipo, categoría, etc.
 
 ---
 

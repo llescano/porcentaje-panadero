@@ -459,10 +459,20 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
   String _formatBakerPercentageForDisplay(double percentage) {
     if (percentage == 0.0) {
       return '0';
-    } else if (percentage < 1.0 && percentage > 0.0) {
-      return NumberFormat('0.##', 'es_ES').format(percentage);
-    } else {
-      return NumberFormat('###0', 'es_ES').format(percentage);
     }
+    
+    // Algoritmo de rangos de magnitud para determinar decimales dinámicamente
+    int decimals;
+    if (percentage >= 100) {
+      decimals = 0; // Valores grandes: sin decimales (ej: 150)
+    } else if (percentage >= 10) {
+      decimals = 1; // Valores medianos: 1 decimal (ej: 15.5)
+    } else if (percentage >= 1) {
+      decimals = 2; // Valores pequeños: 2 decimales (ej: 2.75)
+    } else {
+      decimals = 3; // Valores muy pequeños: 3 decimales (ej: 0.125)
+    }
+    
+    return percentage.toStringAsFixed(decimals);
   }
 }
