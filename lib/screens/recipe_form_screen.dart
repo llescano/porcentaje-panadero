@@ -24,6 +24,7 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
+  final _nameFocusNode = FocusNode();
   final List<RecipeIngredient> _recipeIngredients = [];
   List<Ingredient> _availableIngredients = [];
   bool _isLoading = false;
@@ -68,6 +69,11 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
 
     setState(() {
       _isLoading = false;
+    });
+
+    // Enfocar automáticamente el campo del nombre al cargar el formulario
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      FocusScope.of(context).requestFocus(_nameFocusNode);
     });
   }
 
@@ -423,6 +429,7 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
                       children: [
                         TextFormField(
                           controller: _nameController,
+                          focusNode: _nameFocusNode,
                           decoration: const InputDecoration(
                             labelText: 'Nombre de la Receta',
                           ),
@@ -548,6 +555,7 @@ class _RecipeFormScreenState extends State<RecipeFormScreen> {
   void dispose() {
     _nameController.dispose();
     _descriptionController.dispose();
+    _nameFocusNode.dispose();
     super.dispose();
   }
 }

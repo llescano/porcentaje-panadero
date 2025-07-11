@@ -43,7 +43,6 @@ class Ingredient {
   double?
   conversionFactorToGrams; // Nueva propiedad para el factor de conversión manual a gramos
   bool isActive;
-  bool? isOptional; // Nueva propiedad para indicar si el ingrediente es opcional
   String? notes; // Nueva propiedad para notas adicionales
   DateTime createdAt;
   DateTime updatedAt;
@@ -60,7 +59,6 @@ class Ingredient {
     this.contributesToHydration = false, // Valor por defecto
     this.conversionFactorToGrams, // Inicializar la nueva propiedad
     this.isActive = true,
-    this.isOptional, // Nueva propiedad opcional
     this.notes, // Nueva propiedad para notas
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -97,8 +95,6 @@ class Ingredient {
               as double?, // Deserializar la nueva propiedad
       isActive:
           (map['is_active'] as int? ?? 1) == 1, // Valor por defecto si es nulo
-      isOptional:
-          map['is_optional'] != null ? (map['is_optional'] as int) == 1 : null,
       notes: map['notes'] as String?,
       createdAt: DateTime.parse(map['created_at'] as String),
       updatedAt: DateTime.parse(map['updated_at'] as String),
@@ -120,7 +116,6 @@ class Ingredient {
       'conversion_factor_to_grams':
           conversionFactorToGrams, // Serializar la nueva propiedad
       'is_active': isActive ? 1 : 0,
-      'is_optional': isOptional != null ? (isOptional! ? 1 : 0) : null,
       'notes': notes,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
@@ -144,7 +139,6 @@ class Ingredient {
     bool? contributesToHydration,
     double? conversionFactorToGrams, // Añadir a copyWith
     bool? isActive,
-    bool? isOptional,
     String? notes,
   }) {
     final ingredient = Ingredient(
@@ -162,7 +156,6 @@ class Ingredient {
           conversionFactorToGrams ??
           this.conversionFactorToGrams, // Asignar en copyWith
       isActive: isActive ?? this.isActive,
-      isOptional: isOptional ?? this.isOptional,
       notes: notes ?? this.notes,
       createdAt: createdAt,
       updatedAt: DateTime.now(),

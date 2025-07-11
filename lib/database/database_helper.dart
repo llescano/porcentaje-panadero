@@ -25,7 +25,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 11, // Incrementar la versión de la base de datos
+      version: 12, // Incrementar la versión de la base de datos
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -33,6 +33,15 @@ class DatabaseHelper {
 
   Future<void> _onCreate(Database db, int version) async {
     print('DatabaseHelper: _onCreate ejecutado. Versión: $version');
+    await _createTablesOnly(db);
+    
+    // Insertar datos iniciales
+    print('DatabaseHelper: Insertando datos iniciales...');
+    await _insertInitialData(db);
+    print('DatabaseHelper: Datos iniciales insertados.');
+  }
+
+  Future<void> _createTablesOnly(Database db) async {
     // Tabla de ingredientes
     await db.execute('''
       CREATE TABLE ingredients (
@@ -47,7 +56,6 @@ class DatabaseHelper {
         is_active INTEGER NOT NULL DEFAULT 1,
         contributes_to_hydration BOOLEAN NOT NULL DEFAULT 0,
         conversion_factor_to_grams REAL, -- Añadir la nueva columna
-        is_optional INTEGER NOT NULL DEFAULT 0,
         notes TEXT,
         created_at TEXT NOT NULL,
         updated_at TEXT NOT NULL
@@ -111,11 +119,6 @@ class DatabaseHelper {
     await db.execute(
       'CREATE INDEX idx_recipe_ingredients_ingredient_id ON recipe_ingredients (ingredient_id)',
     );
-
-    // Insertar datos iniciales
-    print('DatabaseHelper: Insertando datos iniciales...');
-    await _insertInitialData(db);
-    print('DatabaseHelper: Datos iniciales insertados.');
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
@@ -170,17 +173,30 @@ class DatabaseHelper {
       );
     }
     if (oldVersion < 11 && newVersion >= 11) {
-      // Migración de v10 a v11: añadir is_optional y notes a ingredients
-      await db.execute(
-        'ALTER TABLE ingredients ADD COLUMN is_optional INTEGER NOT NULL DEFAULT 0;',
-      );
+      // Migración de v10 a v11: añadir notes a ingredients
       await db.execute(
         'ALTER TABLE ingredients ADD COLUMN notes TEXT;',
       );
     }
+    if (oldVersion < 12 && newVersion >= 12) {
+      // Migración de v11 a v12: eliminar is_optional de ingredients
+      await db.execute('CREATE TEMPORARY TABLE ingredients_backup AS SELECT * FROM ingredients;');
+      await db.execute('DROP TABLE ingredients;');
+      await _createTablesOnly(db); // Crear solo las tablas sin datos iniciales
+      await db.execute('INSERT INTO ingredients SELECT id, name, description, default_unit, cost_per_unit, supplier, expiration_date, category, is_active, contributes_to_hydration, conversion_factor_to_grams, notes, created_at, updated_at FROM ingredients_backup;');
+      await db.execute('DROP TABLE ingredients_backup;');
+    }
   }
 
   Future<void> _insertInitialData(Database db) async {
+    // Verificar si ya existen ingredientes en la base de datos
+    final existingIngredients = await db.query('ingredients', limit: 1);
+    if (existingIngredients.isNotEmpty) {
+      print('DatabaseHelper: La base de datos ya contiene ingredientes, omitiendo inserción de datos iniciales.');
+      return;
+    }
+    
+    print('DatabaseHelper: Base de datos vacía, insertando ingredientes básicos...');
     // Ingredientes básicos de panadería
     final basicIngredients = [
       {

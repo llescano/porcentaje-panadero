@@ -19,6 +19,7 @@ class _IngredientFormScreenState extends State<IngredientFormScreen> {
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _costController = TextEditingController();
+  final _nameFocusNode = FocusNode();
   final _supplierController = TextEditingController();
   final _conversionFactorToGramsController = TextEditingController();
   final _notesController = TextEditingController();
@@ -28,11 +29,18 @@ class _IngredientFormScreenState extends State<IngredientFormScreen> {
   DateTime? _expirationDate;
   bool _contributesToHydration = false;
   bool _isActive = true;
-  bool _isOptional = false;
   double? _conversionFactorToGrams;
   bool _isLoading = false;
 
   final IngredientService _ingredientService = IngredientService();
+
+  // Función para capitalizar la primera letra
+  String _capitalizeFirstLetter(String text) {
+    if (text.isEmpty) {
+      return text;
+    }
+    return text[0].toUpperCase() + text.substring(1);
+  }
 
   // Función auxiliar para parsear números formateados con comas
   double? _parseFormattedNumber(String? text) {
@@ -54,6 +62,10 @@ class _IngredientFormScreenState extends State<IngredientFormScreen> {
     if (widget.ingredient != null) {
       _loadIngredientData();
     }
+    // Enfocar automáticamente el campo del nombre al cargar el formulario
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      FocusScope.of(context).requestFocus(_nameFocusNode);
+    });
   }
 
   void _loadIngredientData() {
@@ -73,7 +85,6 @@ class _IngredientFormScreenState extends State<IngredientFormScreen> {
     _expirationDate = ingredient.expirationDate;
     _contributesToHydration = ingredient.contributesToHydration;
     _isActive = ingredient.isActive;
-    _isOptional = ingredient.isOptional ?? false;
     _notesController.text = ingredient.notes ?? '';
     _conversionFactorToGrams = ingredient.conversionFactorToGrams;
     _conversionFactorToGramsController.text =
@@ -93,6 +104,7 @@ class _IngredientFormScreenState extends State<IngredientFormScreen> {
     _supplierController.dispose();
     _conversionFactorToGramsController.dispose();
     _notesController.dispose();
+    _nameFocusNode.dispose();
     super.dispose();
   }
 
@@ -142,7 +154,6 @@ class _IngredientFormScreenState extends State<IngredientFormScreen> {
         contributesToHydration: _contributesToHydration,
         conversionFactorToGrams: finalConversionFactor,
         isActive: _isActive,
-        isOptional: _isOptional,
         notes:
             _notesController.text.trim().isEmpty
                 ? null
@@ -275,6 +286,7 @@ class _IngredientFormScreenState extends State<IngredientFormScreen> {
                     // Nombre del ingrediente
                     TextFormField(
                       controller: _nameController,
+                      focusNode: _nameFocusNode,
                       decoration: const InputDecoration(
                         labelText: 'Nombre del ingrediente *',
                         border: OutlineInputBorder(),
@@ -286,6 +298,17 @@ class _IngredientFormScreenState extends State<IngredientFormScreen> {
                           return 'El nombre es obligatorio';
                         }
                         return null;
+                      },
+                      onChanged: (value) {
+                        final String capitalizedValue = _capitalizeFirstLetter(value);
+                        if (_nameController.text != capitalizedValue) {
+                          _nameController.value = _nameController.value.copyWith(
+                            text: capitalizedValue,
+                            selection: TextSelection.collapsed(
+                              offset: capitalizedValue.length,
+                            ),
+                          );
+                        }
                       },
                     ),
 
@@ -523,45 +546,6 @@ class _IngredientFormScreenState extends State<IngredientFormScreen> {
                                         ? (value) {
                                           setState(() {
                                             _contributesToHydration = value;
-                                          });
-                                        }
-                                        : null,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // Es opcional - Switch más pequeño
-                    Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey.shade400),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.help_outline, color: Colors.grey),
-                            const SizedBox(width: 12),
-                            const Expanded(
-                              child: Text(
-                                'Es opcional?',
-                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                              ),
-                            ),
-                            Transform.scale(
-                              scale: 0.8, // Hacer el switch más pequeño
-                              child: Switch(
-                                value: _isOptional,
-                                onChanged:
-                                    _isActive
-                                        ? (value) {
-                                          setState(() {
-                                            _isOptional = value;
                                           });
                                         }
                                         : null,
