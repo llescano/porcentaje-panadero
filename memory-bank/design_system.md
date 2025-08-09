@@ -5,22 +5,31 @@ Este documento detalla el sistema de diseño de la aplicación "Porcentaje Panad
 ## Paleta de Colores
 
 ### Tema Claro
-- **`primary`**: `Colors.brown` (Color principal de la aplicación)
-- **`surface`**: `Color(0xFFFFFFFF)` (Blanco puro, usado para fondos de tarjetas y elementos que necesitan contraste con el fondo general)
-- **`onSurface`**: `Colors.black` (Negro, usado para texto principal sobre superficies claras, proporcionando alto contraste)
-- **`onSurfaceVariant`**: `Colors.brown[900]` (Marrón muy oscuro, usado para iconos y elementos decorativos sobre superficies claras, proporcionando alto contraste)
+- **`primary`**: `Color(0xFF6B3410)` (Chocolate oscuro - color principal elegante y profesional)
+- **`secondary`**: `Color(0xFFD2691E)` (Chocolate claro - color secundario cálido)
+- **`tertiary`**: `Color(0xFFF4A460)` (Sandy Brown - acento cálido para elementos destacados)
+- **`surface`**: `Color(0xFFFFFBF5)` (Crema muy suave - fondo de tarjetas con calidez sutil)
+- **`onPrimary`**: `Colors.white` (Blanco sobre elementos primarios)
+- **`onSecondary`**: `Colors.white` (Blanco sobre elementos secundarios)
+- **`onSurface`**: `Color(0xFF2C1810)` (Marrón muy oscuro para texto principal, excelente legibilidad)
+- **`onSurfaceVariant`**: `Color(0xFF5D4037)` (Marrón medio para iconos y elementos secundarios)
 
 ### Tema Oscuro
-- **`primary`**: `Colors.brown[800]` (Marrón oscuro, color principal en el tema oscuro)
-- **`surface`**: `Colors.blueGrey[900]` (Gris azulado muy oscuro, usado para fondos de tarjetas y elementos para distinguirlos del fondo general oscuro)
-- **`onSurface`**: `Colors.white` (Blanco, usado para texto principal sobre superficies oscuras, proporcionando alto contraste)
-- **`onSurfaceVariant`**: `Colors.brown[300]` (Marrón claro, usado para iconos y elementos decorativos sobre superficies oscuras)
+- **`primary`**: `Color(0xFF8D6E63)` (Brown 400 - más suave y elegante para tema oscuro)
+- **`secondary`**: `Color(0xFFBCAAA4)` (Brown 200 - secundario suave)
+- **`tertiary`**: `Color(0xFFFFCC80)` (Amber 200 - acento cálido que contrasta bien en oscuro)
+- **`surface`**: `Color(0xFF2E2E2E)` (Gris oscuro elegante para tarjetas)
+- **`background`**: `Color(0xFF1C1C1C)` (Fondo principal muy oscuro y profesional)
+- **`onPrimary`**: `Colors.white` (Blanco sobre elementos primarios)
+- **`onSecondary`**: `Color(0xFF1C1C1C)` (Oscuro sobre elementos secundarios claros)
+- **`onSurface`**: `Color(0xFFE8E3E0)` (Beige claro para texto, suave a la vista)
+- **`onSurfaceVariant`**: `Color(0xFFBCAAA4)` (Brown 200 para iconos, mantiene la calidez)
 
 ## Tipografía
 
 La tipografía principal utilizada es la predeterminada de Material Design (generalmente Roboto).
 
-- **Títulos de AppBar**: `fontWeight: FontWeight.w500`, `fontSize: 18`, `color: Colors.white`
+- **Títulos de AppBar**: `fontWeight: FontWeight.w600`, `fontSize: 18`, `color: Colors.white`
 - **Títulos de Sección (ej. en IngredientDetailScreen)**: `fontSize: 24`, `fontWeight: FontWeight.bold`, `color: Theme.of(context).colorScheme.onSurface`
 - **Subtítulos/Categorías**: `fontSize: 16`, `color: Theme.of(context).colorScheme.onSurface`
 - **Texto de Descripción**: `fontSize: 14`

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/theme_provider.dart';
+import 'animated_theme_toggle.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
@@ -27,8 +28,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
     return AppBar(
       title: Text(title),
-      backgroundColor: Colors.brown[900],
-      foregroundColor: Colors.white,
+      backgroundColor: Theme.of(context).colorScheme.primary,
+      foregroundColor: Theme.of(context).colorScheme.onPrimary,
       leading:
           showBackButton
               ? IconButton(
@@ -39,9 +40,9 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       actions: [
         if (isForm) ..._buildFormActions(context),
         ...?actions,
-        IconButton(
-          icon: Icon(isDark ? Icons.light_mode : Icons.dark_mode),
-          onPressed: () => themeProvider.toggleTheme(!isDark),
+        AnimatedThemeToggle(
+          isDark: isDark,
+          onToggle: () => themeProvider.toggleTheme(!isDark),
         ),
       ],
     );

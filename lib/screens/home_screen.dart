@@ -34,7 +34,7 @@ class HomeContent extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'Gestiona tus recetas de panadería con porcentajes precisos',
+            'Recetas de panadería con porcentajes precisos',
             style: TextStyle(fontSize: 16, color: Theme.of(context).colorScheme.onSurface),
             textAlign: TextAlign.center,
           ),
@@ -61,9 +61,8 @@ class HomeContent extends StatelessWidget {
             Expanded(
               child: _buildActionCard(
                 context,
-                icon: _buildAddIcon(context, Icons.receipt_long),
-                title: 'Nueva Receta',
-                subtitle: 'Crear una nueva receta',
+                icon: Icon(Icons.receipt_long, size: 40, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                title: 'Crear Receta',
                 onTap: () => Navigator.pushNamed(context, '/recipe/add'),
               ),
             ),
@@ -71,9 +70,8 @@ class HomeContent extends StatelessWidget {
             Expanded(
               child: _buildActionCard(
                 context,
-                icon: _buildAddIcon(context, Icons.inventory_2),
-                title: 'Nuevo Ingrediente',
-                subtitle: 'Agregar a la alacena',
+                icon: Icon(Icons.inventory_2, size: 40, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                title: 'Agregar Ingrediente',
                 onTap: () => Navigator.pushNamed(context, '/ingredient/add'),
               ),
             ),
@@ -83,35 +81,12 @@ class HomeContent extends StatelessWidget {
     );
   }
 
-  Widget _buildAddIcon(BuildContext context, IconData baseIcon) {
-    return Stack(
-      alignment: Alignment.center,
-      children: [
-        Icon(baseIcon, size: 40, color: Theme.of(context).colorScheme.onSurfaceVariant),
-        Positioned(
-          right: 0,
-          bottom: 0,
-          child: Container(
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface, // Fondo blanco o color de superficie del tema
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.add_circle_rounded, // Usar un icono de círculo lleno
-              size: 24, // Aumentar ligeramente el tamaño
-              color: Theme.of(context).colorScheme.primary, // Color principal del tema
-            ),
-          ),
-        ),
-      ],
-    );
-  }
+
 
   Widget _buildActionCard(
     BuildContext context, {
-    required Widget icon, // Cambiar a Widget para aceptar el Stack
+    required Widget icon,
     required String title,
-    required String subtitle,
     required VoidCallback onTap,
   }) {
     return Card(
@@ -122,22 +97,20 @@ class HomeContent extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              icon, // Usar el widget de icono directamente
-              const SizedBox(height: 8),
+              SizedBox(
+                height: 40,
+                child: icon,
+              ),
+              const SizedBox(height: 12),
               Text(
                 title,
                 style: TextStyle(
                   fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.onSurface, // Asegurar consistencia de color
+                  fontWeight: FontWeight.w600,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 4),
-              Text(
-                subtitle,
-                style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurface),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -162,8 +135,7 @@ class HomeContent extends StatelessWidget {
               child: _buildActionCard(
                 context,
                 icon: Icon(Icons.receipt_long, size: 40, color: Theme.of(context).colorScheme.onSurfaceVariant),
-                title: 'Recetas',
-                subtitle: 'Ver todas las recetas guardadas',
+                title: 'Mis Recetas',
                 onTap: () => Navigator.pushNamed(context, '/recipes'),
               ),
             ),
@@ -172,8 +144,7 @@ class HomeContent extends StatelessWidget {
               child: _buildActionCard(
                 context,
                 icon: Icon(Icons.inventory_2, size: 40, color: Theme.of(context).colorScheme.onSurfaceVariant),
-                title: 'Alacena',
-                subtitle: 'Gestionar ingredientes',
+                title: 'Mi Alacena',
                 onTap: () => Navigator.pushNamed(context, '/ingredients'),
               ),
             ),

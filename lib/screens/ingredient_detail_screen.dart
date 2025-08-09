@@ -183,7 +183,7 @@ class IngredientDetailScreen extends StatelessWidget {
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
-                                  'Funcionalidad próximamente',
+                                  'Próximamente',
                                   style: TextStyle(
                                     color: Theme.of(context).colorScheme.onSurface,
                                     fontSize: 14,
@@ -191,7 +191,7 @@ class IngredientDetailScreen extends StatelessWidget {
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
-                                  'Aquí podrás ver en qué recetas se usa este ingrediente',
+                                  'Recetas que usan este ingrediente',
                                   style: TextStyle(
                                     color: Theme.of(context).colorScheme.onSurface,
                                     fontSize: 12,

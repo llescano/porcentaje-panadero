@@ -1,20 +1,35 @@
+import 'package:flutter/foundation.dart';
 import '../database/database_helper.dart';
 import '../models/ingredient.dart';
 
 class IngredientService {
-  final DatabaseHelper _db = DatabaseHelper();
+  DatabaseHelper? _db;
+  
+  DatabaseHelper? get db {
+    if (kIsWeb) return null;
+    _db ??= DatabaseHelper();
+    return _db;
+  }
 
   // Crear un nuevo ingrediente
   Future<String> createIngredient(Ingredient ingredient) async {
-    final db = await _db.database;
-    await db.insert('ingredients', ingredient.toMap());
+    if (kIsWeb) {
+      // En web, simular éxito pero no hacer nada
+      return ingredient.id;
+    }
+    final database = await db!.database;
+    await database.insert('ingredients', ingredient.toMap());
     return ingredient.id;
   }
 
   // Obtener todos los ingredientes activos
   Future<List<Ingredient>> getActiveIngredients() async {
-    final db = await _db.database;
-    final List<Map<String, dynamic>> maps = await db.query(
+    if (kIsWeb) {
+      // En web, retornar lista vacía
+      return [];
+    }
+    final database = await db!.database;
+    final List<Map<String, dynamic>> maps = await database.query(
       'ingredients',
       where: 'is_active = ?',
       whereArgs: [1],
@@ -28,8 +43,11 @@ class IngredientService {
 
   // Obtener todos los ingredientes (activos e inactivos)
   Future<List<Ingredient>> getAllIngredients() async {
-    final db = await _db.database;
-    final List<Map<String, dynamic>> maps = await db.query(
+    if (kIsWeb) {
+      return [];
+    }
+    final database = await db!.database;
+    final List<Map<String, dynamic>> maps = await database.query(
       'ingredients',
       orderBy: 'name ASC',
     );
@@ -41,8 +59,12 @@ class IngredientService {
 
   // Obtener ingrediente por ID
   Future<Ingredient?> getIngredientById(String id) async {
-    final db = await _db.database;
-    final List<Map<String, dynamic>> maps = await db.query(
+    if (kIsWeb) {
+      // En web, retornar null
+      return null;
+    }
+    final database = await db!.database;
+    final List<Map<String, dynamic>> maps = await database.query(
       'ingredients',
       where: 'id = ?',
       whereArgs: [id],
@@ -56,8 +78,11 @@ class IngredientService {
 
   // Buscar ingredientes por nombre
   Future<List<Ingredient>> searchIngredients(String query) async {
-    final db = await _db.database;
-    final List<Map<String, dynamic>> maps = await db.query(
+    if (kIsWeb) {
+      return [];
+    }
+    final database = await db!.database;
+    final List<Map<String, dynamic>> maps = await database.query(
       'ingredients',
       where: 'name LIKE ? AND is_active = ?',
       whereArgs: ['%$query%', 1],
@@ -71,8 +96,11 @@ class IngredientService {
 
   // Obtener ingredientes por categoría
   Future<List<Ingredient>> getIngredientsByCategory(IngredientCategory category) async {
-    final db = await _db.database;
-    final List<Map<String, dynamic>> maps = await db.query(
+    if (kIsWeb) {
+      return [];
+    }
+    final database = await db!.database;
+    final List<Map<String, dynamic>> maps = await database.query(
       'ingredients',
       where: 'category = ? AND is_active = ?',
       whereArgs: [category.index, 1],
@@ -86,9 +114,12 @@ class IngredientService {
 
   // Actualizar ingrediente
   Future<void> updateIngredient(Ingredient ingredient) async {
-    final db = await _db.database;
+    if (kIsWeb) {
+      return;
+    }
+    final database = await db!.database;
     ingredient.touch(); // Actualizar timestamp
-    await db.update(
+    await database.update(
       'ingredients',
       ingredient.toMap(),
       where: 'id = ?',
@@ -98,8 +129,11 @@ class IngredientService {
 
   // Eliminar ingrediente (soft delete)
   Future<void> deleteIngredient(String id) async {
-    final db = await _db.database;
-    await db.update(
+    if (kIsWeb) {
+      return;
+    }
+    final database = await db!.database;
+    await database.update(
       'ingredients',
       {
         'is_active': 0,
@@ -112,8 +146,11 @@ class IngredientService {
 
   // Eliminar ingrediente permanentemente
   Future<void> deleteIngredientPermanently(String id) async {
-    final db = await _db.database;
-    await db.delete(
+    if (kIsWeb) {
+      return;
+    }
+    final database = await db!.database;
+    await database.delete(
       'ingredients',
       where: 'id = ?',
       whereArgs: [id],
@@ -122,8 +159,11 @@ class IngredientService {
 
   // Restaurar ingrediente
   Future<void> restoreIngredient(String id) async {
-    final db = await _db.database;
-    await db.update(
+    if (kIsWeb) {
+      return;
+    }
+    final database = await db!.database;
+    await database.update(
       'ingredients',
       {
         'is_active': 1,
@@ -136,8 +176,11 @@ class IngredientService {
 
   // Verificar si un ingrediente está siendo usado en recetas
   Future<bool> isIngredientInUse(String ingredientId) async {
-    final db = await _db.database;
-    final result = await db.query(
+    if (kIsWeb) {
+      return false;
+    }
+    final database = await db!.database;
+    final result = await database.query(
       'recipe_ingredients',
       where: 'ingredient_id = ?',
       whereArgs: [ingredientId],
@@ -148,17 +191,20 @@ class IngredientService {
 
   // Obtener estadísticas de ingredientes
   Future<Map<String, int>> getIngredientStats() async {
-    final db = await _db.database;
+    if (kIsWeb) {
+      return {'active': 0, 'total': 0};
+    }
+    final database = await db!.database;
     
-    final activeCount = await db.rawQuery(
+    final activeCount = await database.rawQuery(
       'SELECT COUNT(*) as count FROM ingredients WHERE is_active = 1'
     );
     
-    final totalCount = await db.rawQuery(
+    final totalCount = await database.rawQuery(
       'SELECT COUNT(*) as count FROM ingredients'
     );
 
-    final categoryStats = await db.rawQuery('''
+    final categoryStats = await database.rawQuery('''
       SELECT category, COUNT(*) as count 
       FROM ingredients 
       WHERE is_active = 1 
@@ -180,8 +226,11 @@ class IngredientService {
 
   // Importar ingredientes en lote
   Future<List<String>> importIngredients(List<Ingredient> ingredients) async {
-    final db = await _db.database;
-    final batch = db.batch();
+    if (kIsWeb) {
+      return ingredients.map((i) => i.id).toList();
+    }
+    final database = await db!.database;
+    final batch = database.batch();
     final ids = <String>[];
 
     for (var ingredient in ingredients) {

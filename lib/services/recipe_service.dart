@@ -1,17 +1,28 @@
+import 'package:flutter/foundation.dart';
 import '../database/database_helper.dart';
 import '../models/recipe.dart';
 import '../models/recipe_ingredient.dart';
 import '../services/ingredient_service.dart';
 
 class RecipeService {
-  final DatabaseHelper _db = DatabaseHelper();
+  DatabaseHelper? _db;
   final IngredientService _ingredientService = IngredientService();
+  
+  DatabaseHelper? get db {
+    if (kIsWeb) return null;
+    _db ??= DatabaseHelper();
+    return _db;
+  }
 
   // Crear una nueva receta
   Future<String> addRecipe(Recipe recipe, List<RecipeIngredient> ingredients) async {
-    final db = await _db.database;
+    if (kIsWeb) {
+      // En web, simular éxito pero no hacer nada
+      return recipe.id;
+    }
+    final database = await db!.database;
     
-    await db.transaction((txn) async {
+    await database.transaction((txn) async {
       await txn.insert('recipes', recipe.toMap());
       for (var ri in ingredients) {
         await txn.insert('recipe_ingredients', ri.toMap());
@@ -22,8 +33,12 @@ class RecipeService {
 
   // Obtener todas las recetas
   Future<List<Recipe>> getRecipes() async {
-    final db = await _db.database;
-    final List<Map<String, dynamic>> maps = await db.query(
+    if (kIsWeb) {
+      // En web, retornar lista vacía
+      return [];
+    }
+    final database = await db!.database;
+    final List<Map<String, dynamic>> maps = await database.query(
       'recipes',
       where: 'is_active = ?',
       whereArgs: [1],
@@ -39,8 +54,12 @@ class RecipeService {
 
   // Obtener receta por ID
   Future<Recipe?> getRecipeById(String id) async {
-    final db = await _db.database;
-    final List<Map<String, dynamic>> maps = await db.query(
+    if (kIsWeb) {
+      // En web, retornar null
+      return null;
+    }
+    final database = await db!.database;
+    final List<Map<String, dynamic>> maps = await database.query(
       'recipes',
       where: 'id = ?',
       whereArgs: [id],
@@ -54,8 +73,12 @@ class RecipeService {
 
   // Obtener ingredientes de una receta
   Future<List<RecipeIngredient>> getRecipeIngredients(String recipeId) async {
-    final db = await _db.database;
-    final List<Map<String, dynamic>> maps = await db.rawQuery('''
+    if (kIsWeb) {
+      // En web, retornar lista vacía
+      return [];
+    }
+    final database = await db!.database;
+    final List<Map<String, dynamic>> maps = await database.rawQuery('''
       SELECT ri.*, i.name as ingredient_name, i.default_unit as ingredient_unit
       FROM recipe_ingredients ri
       INNER JOIN ingredients i ON ri.ingredient_id = i.id
@@ -75,9 +98,12 @@ class RecipeService {
 
   // Actualizar receta
   Future<void> updateRecipe(Recipe recipe, List<RecipeIngredient> ingredients) async {
-    final db = await _db.database;
+    if (kIsWeb) {
+      return;
+    }
+    final database = await db!.database;
     
-    await db.transaction((txn) async {
+    await database.transaction((txn) async {
       recipe.touch();
       await txn.update(
         'recipes',
@@ -100,8 +126,11 @@ class RecipeService {
 
   // Eliminar receta (soft delete)
   Future<void> deleteRecipe(String id) async {
-    final db = await _db.database;
-    await db.update(
+    if (kIsWeb) {
+      return;
+    }
+    final database = await db!.database;
+    await database.update(
       'recipes',
       {
         'is_active': 0,
@@ -114,9 +143,12 @@ class RecipeService {
 
   // Eliminar receta permanentemente
   Future<void> deleteRecipePermanently(String id) async {
-    final db = await _db.database;
+    if (kIsWeb) {
+      return;
+    }
+    final database = await db!.database;
     
-    await db.transaction((txn) async {
+    await database.transaction((txn) async {
       // Eliminar ingredientes de la receta
       await txn.delete(
         'recipe_ingredients',
@@ -135,8 +167,11 @@ class RecipeService {
 
   // Restaurar receta
   Future<void> restoreRecipe(String id) async {
-    final db = await _db.database;
-    await db.update(
+    if (kIsWeb) {
+      return;
+    }
+    final database = await db!.database;
+    await database.update(
       'recipes',
       {
         'is_active': 1,
@@ -165,17 +200,20 @@ class RecipeService {
 
   // Obtener estadísticas de recetas
   Future<Map<String, int>> getRecipeStats() async {
-    final db = await _db.database;
+    if (kIsWeb) {
+      return {'active': 0, 'total': 0};
+    }
+    final database = await db!.database;
     
-    final activeCount = await db.rawQuery(
+    final activeCount = await database.rawQuery(
       'SELECT COUNT(*) as count FROM recipes WHERE is_active = 1'
     );
     
-    final totalCount = await db.rawQuery(
+    final totalCount = await database.rawQuery(
       'SELECT COUNT(*) as count FROM recipes'
     );
 
-    final categoryStats = await db.rawQuery('''
+    final categoryStats = await database.rawQuery('''
       SELECT category, COUNT(*) as count 
       FROM recipes 
       WHERE is_active = 1 
@@ -197,8 +235,11 @@ class RecipeService {
 
   // Buscar recetas que usan un ingrediente específico
   Future<List<Recipe>> getRecipesByIngredient(String ingredientId) async {
-    final db = await _db.database;
-    final List<Map<String, dynamic>> maps = await db.rawQuery('''
+    if (kIsWeb) {
+      return [];
+    }
+    final database = await db!.database;
+    final List<Map<String, dynamic>> maps = await database.rawQuery('''
       SELECT DISTINCT r.* 
       FROM recipes r
       INNER JOIN recipe_ingredients ri ON r.id = ri.recipe_id
