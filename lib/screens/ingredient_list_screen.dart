@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart'; // Importar provider
-import '../providers/theme_provider.dart'; // Importar ThemeProvider
 import '../models/ingredient.dart';
 import '../services/ingredient_service.dart';
 import '../widgets/navigation_drawer.dart';
@@ -115,75 +114,70 @@ class _IngredientListScreenState extends State<IngredientListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<ThemeProvider>(
-      // Envolver con Consumer
-      builder: (context, themeProvider, child) {
-        return Scaffold(
-          appBar: CustomAppBar(
-            title: 'Alacena',
-            showBackButton: true, // Habilitar el botón de retroceso
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.refresh),
-                onPressed: _loadIngredients,
-              ),
-            ],
+    return Scaffold(
+      appBar: CustomAppBar(
+        title: 'Alacena',
+        showBackButton: true, // Habilitar el botón de retroceso
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: _loadIngredients,
           ),
-          drawer: const AppNavigationDrawer(),
-          body: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: SegmentedButton<IngredientFilter>(
-                  segments: const <ButtonSegment<IngredientFilter>>[
-                    ButtonSegment<IngredientFilter>(
-                      value: IngredientFilter.active,
-                      label: Text('Activos'),
-                      icon: Icon(Icons.check_circle_outline),
-                    ),
-                    ButtonSegment<IngredientFilter>(
-                      value: IngredientFilter.inactive,
-                      label: Text('Inactivos'),
-                      icon: Icon(Icons.cancel_outlined),
-                    ),
-                    ButtonSegment<IngredientFilter>(
-                      value: IngredientFilter.all,
-                      label: Text('Todos'),
-                      icon: Icon(Icons.list),
-                    ),
-                  ],
-                  selected: <IngredientFilter>{_currentFilter},
-                  onSelectionChanged: (Set<IngredientFilter> newSelection) {
-                    setState(() {
-                      _currentFilter = newSelection.first;
-                      _applyFilter();
-                    });
-                  },
+        ],
+      ),
+      drawer: const AppNavigationDrawer(),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: SegmentedButton<IngredientFilter>(
+              segments: const <ButtonSegment<IngredientFilter>>[
+                ButtonSegment<IngredientFilter>(
+                  value: IngredientFilter.active,
+                  label: Text('Activos'),
+                  icon: Icon(Icons.check_circle_outline),
                 ),
-              ),
-              Expanded(
-                child: _isLoading
-                    ? const Center(child: CircularProgressIndicator())
-                    : _filteredIngredients.isEmpty
-                        ? _buildEmptyState()
-                        : _buildIngredientList(),
-              ),
-            ],
+                ButtonSegment<IngredientFilter>(
+                  value: IngredientFilter.inactive,
+                  label: Text('Inactivos'),
+                  icon: Icon(Icons.cancel_outlined),
+                ),
+                ButtonSegment<IngredientFilter>(
+                  value: IngredientFilter.all,
+                  label: Text('Todos'),
+                  icon: Icon(Icons.list),
+                ),
+              ],
+              selected: <IngredientFilter>{_currentFilter},
+              onSelectionChanged: (Set<IngredientFilter> newSelection) {
+                setState(() {
+                  _currentFilter = newSelection.first;
+                  _applyFilter();
+                });
+              },
+            ),
           ),
-          floatingActionButton: FloatingActionButton(
-            onPressed: () async {
-              final result = await Navigator.pushNamed(
-                context,
-                '/ingredient/add',
-              );
-              if (result == true) {
-                _loadIngredients();
-              }
-            },
-            child: const Icon(Icons.add),
+          Expanded(
+            child: _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : _filteredIngredients.isEmpty
+                    ? _buildEmptyState()
+                    : _buildIngredientList(),
           ),
-        );
-      },
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          final result = await Navigator.pushNamed(
+            context,
+            '/ingredient/add',
+          );
+          if (result == true) {
+            _loadIngredients();
+          }
+        },
+        child: const Icon(Icons.add),
+      ),
     );
   }
 

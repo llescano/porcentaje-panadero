@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
-import '../widgets/navigation_drawer.dart';
-import '../widgets/custom_app_bar.dart'; // Importar CustomAppBar
+import 'package:porcentaje_panadero/theme/text_styles.dart';
+import 'package:porcentaje_panadero/widgets/gradient_border_container.dart';
+import 'package:porcentaje_panadero/theme/colors.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // El AppBar ahora se configura globalmente desde el BakeryTheme
     return Scaffold(
-      appBar: const CustomAppBar(
-        title: 'Porcentaje Panadero',
-      ), // Usar CustomAppBar
-      drawer: const AppNavigationDrawer(),
+      appBar: AppBar(
+        title: const Text('Bakery Warm'),
+      ),
       body: const HomeContent(),
     );
   }
@@ -23,25 +24,26 @@ class HomeContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(24.0),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           const SizedBox(height: 20),
-          const Text(
-            '¡Bienvenido!',
-            style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 16),
           Text(
-            'Recetas de panadería con porcentajes precisos',
-            style: TextStyle(fontSize: 16, color: Theme.of(context).colorScheme.onSurface),
+            'Bienvenido a Bakery Warm',
+            style: BakeryTextStyles.h1,
             textAlign: TextAlign.center,
           ),
+          const SizedBox(height: 12),
+          Text(
+            'Tu asistente para recetas de panadería perfectas.',
+            style: BakeryTextStyles.bodyLarge,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 48),
+          _buildQuickActions(context),
           const SizedBox(height: 40),
           _buildExploreSection(context),
-          const SizedBox(height: 40),
-          _buildQuickActions(context),
         ],
       ),
     );
@@ -51,17 +53,14 @@ class HomeContent extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Acciones Rápidas',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-        ),
+        Text('Acciones Rápidas', style: BakeryTextStyles.h2),
         const SizedBox(height: 16),
         Row(
           children: [
             Expanded(
               child: _buildActionCard(
                 context,
-                icon: Icon(Icons.receipt_long, size: 40, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                iconData: Icons.add_chart,
                 title: 'Crear Receta',
                 onTap: () => Navigator.pushNamed(context, '/recipe/add'),
               ),
@@ -70,7 +69,7 @@ class HomeContent extends StatelessWidget {
             Expanded(
               child: _buildActionCard(
                 context,
-                icon: Icon(Icons.inventory_2, size: 40, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                iconData: Icons.kitchen_outlined,
                 title: 'Agregar Ingrediente',
                 onTap: () => Navigator.pushNamed(context, '/ingredient/add'),
               ),
@@ -81,60 +80,18 @@ class HomeContent extends StatelessWidget {
     );
   }
 
-
-
-  Widget _buildActionCard(
-    BuildContext context, {
-    required Widget icon,
-    required String title,
-    required VoidCallback onTap,
-  }) {
-    return Card(
-      elevation: 2,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(8),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SizedBox(
-                height: 40,
-                child: icon,
-              ),
-              const SizedBox(height: 12),
-              Text(
-                title,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _buildExploreSection(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Explorar',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-        ),
+        Text('Explorar', style: BakeryTextStyles.h2),
         const SizedBox(height: 16),
         Row(
           children: [
             Expanded(
               child: _buildActionCard(
                 context,
-                icon: Icon(Icons.receipt_long, size: 40, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                iconData: Icons.menu_book_outlined,
                 title: 'Mis Recetas',
                 onTap: () => Navigator.pushNamed(context, '/recipes'),
               ),
@@ -143,7 +100,7 @@ class HomeContent extends StatelessWidget {
             Expanded(
               child: _buildActionCard(
                 context,
-                icon: Icon(Icons.inventory_2, size: 40, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                iconData: Icons.inventory_2_outlined,
                 title: 'Mi Alacena',
                 onTap: () => Navigator.pushNamed(context, '/ingredients'),
               ),
@@ -151,6 +108,36 @@ class HomeContent extends StatelessWidget {
           ],
         ),
       ],
+    );
+  }
+
+  Widget _buildActionCard(
+    BuildContext context, {
+    required IconData iconData,
+    required String title,
+    required VoidCallback onTap,
+  }) {
+    return GradientBorderContainer(
+      onTap: onTap,
+      innerPadding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 16.0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            iconData,
+            size: 40,
+            color: BakeryColors.carameloSuave,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            title,
+            style: BakeryTextStyles.bodyLarge.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
     );
   }
 }

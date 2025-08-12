@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../providers/theme_provider.dart';
-import 'animated_theme_toggle.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
@@ -23,27 +20,19 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
-    final isDark = themeProvider.themeMode == ThemeMode.dark;
-
     return AppBar(
       title: Text(title),
-      backgroundColor: Theme.of(context).colorScheme.primary,
-      foregroundColor: Theme.of(context).colorScheme.onPrimary,
-      leading:
-          showBackButton
-              ? IconButton(
-                icon: const Icon(Icons.arrow_back),
-                onPressed: () => Navigator.of(context).pop(),
-              )
-              : null,
+      // The colors are now driven by the global theme (BakeryTheme)
+      leading: showBackButton
+          ? IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () => Navigator.of(context).pop(),
+            )
+          : null,
       actions: [
         if (isForm) ..._buildFormActions(context),
         ...?actions,
-        AnimatedThemeToggle(
-          isDark: isDark,
-          onToggle: () => themeProvider.toggleTheme(!isDark),
-        ),
+        // The AnimatedThemeToggle has been removed as it's not part of the new design.
       ],
     );
   }
